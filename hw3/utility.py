@@ -2,8 +2,13 @@ import os
 import sys
 
 
+class StopExecution(Exception):
+    def _render_traceback_(self):
+        return []
+
+
 def exit():
-    raise Exception()
+    raise StopExecution
 
 
 class HiddenPrints:

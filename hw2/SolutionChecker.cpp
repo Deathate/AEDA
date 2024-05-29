@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
     unordered_map<string, FFproperty *> FF_map;
     unordered_map<string, FF *> FF_list;
     unordered_map<string, Pin *> pin_list;
+    unordered_map<string, bool> pin_exist;
     unordered_map<string, NetList *> net_list;
 
     unordered_map<string, set<string> > ff_pins;
@@ -144,6 +145,8 @@ int main(int argc, char *argv[]) {
             pin_list[ff_name] = new Pin();
             if (tok == "INPUT") pin_list[ff_name]->is_input = true;
             pin_list[ff_name]->pinname = ff_name;
+
+            pin_exist[ff_name] = false;
 
             ss >> tok;
             tok = tok.substr(1, tok.length() - 2);
@@ -263,6 +266,13 @@ int main(int argc, char *argv[]) {
             out_net_list[tok]->FFname = ff_name;
             out_net_list[tok]->slack = slack;
 
+            if (pin_exist[tok] == true) {
+                cout << "ON LINE " << line_cnt << '\n';
+                cout << "PIN REDUNDANT [" << out_net_list[tok]->pinname << "]. O.O\n";
+                return -1;
+            } else
+                pin_exist[tok] = true;
+
             if (pin_list.find(out_net_list[tok]->pinname) == pin_list.end()) {
                 cout << "ON LINE " << line_cnt << '\n';
                 cout << "UNDEFINED PIN NAME [" << out_net_list[tok]->pinname << "]. O.O\n";
@@ -338,6 +348,13 @@ int main(int argc, char *argv[]) {
             }
         }
         now_set = -1;
+    }
+
+    for (auto &i : pin_exist) {
+        if (!i.second) {
+            cout << "OOPS! PIN [" << i.first << "] UNCONNECTED. X.X";
+            return -1;
+        }
     }
 
     int total_p = 0;
